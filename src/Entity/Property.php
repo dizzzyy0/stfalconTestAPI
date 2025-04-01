@@ -45,6 +45,10 @@ class Property
     #[Groups(['list', 'detail'])]
     private PropertyStatus $status;
 
+    #[ORM\ManyToOne(inversedBy: 'properties')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Agent $agent = null;
+
     public function __construct()
     {
         $this->id = Uuid::v4();
@@ -121,6 +125,18 @@ class Property
     public function setStatus(PropertyStatus $status): self
     {
         $this->status = $status;
+        return $this;
+    }
+
+    public function getAgent(): ?Agent
+    {
+        return $this->agent;
+    }
+
+    public function setAgent(?Agent $agent): static
+    {
+        $this->agent = $agent;
+
         return $this;
     }
 }

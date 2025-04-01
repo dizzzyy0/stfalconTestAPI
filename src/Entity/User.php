@@ -5,23 +5,31 @@ namespace App\Entity;
 
 use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\DiscriminatorColumn;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Doctrine\ORM\Mapping\DiscriminatorMap;
 use Symfony\Component\Uid\Uuid;
 use JMS\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
-class User implements UserInterface, PasswordAuthenticatedUserInterface
+#[ORM\InheritanceType('SINGLE_TABLE')]
+#[DiscriminatorColumn(name: 'discriminator', type: 'string')]
+#[DiscriminatorMap([
+    "agent" => Agent::class,
+    "customer" => Customer::class,
+    "admin" => Admin::class,
+])]
+abstract class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     public const ROLE_ADMIN = 'admin';
     public const ROLE_AGENT = 'agent';
     public const ROLE_CUSTOMER = 'customer';
 
     #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column]
+    #[ORM\Column(type: 'uuid', unique: true)]
     #[Groups(["list", "details"])]
     private ?Uuid $id = null;
 
@@ -52,6 +60,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column]
     private bool $isBlocked = false;
+
+    public function __construct()
+    {
+        $this->id = Uuid::v4();
+    }
 
     public function getId(): ?Uuid
     {
@@ -93,8 +106,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             $symfonyRoles[] = 'ROLE_' . strtoupper($role);
         }
 
-        // guarantee every user at least has ROLE_USER
-        $symfonyRoles[] = 'ROLE_USER';
+        // guarantee every user at least has ROLE_CUSTOMER
+        $symfonyRoles[] = 'ROLE_CUSTOMER';
 
         return array_unique($symfonyRoles);
     }

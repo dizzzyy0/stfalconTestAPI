@@ -11,25 +11,29 @@ security:
                 class: App\Entity\User
                 property: email
     firewalls:
+        dev:
+            pattern: ^/(_(profiler|wdt)|css|images|js)/
+            security: false
         login:
             pattern: ^/api/login
             stateless: true
             provider: app_user_provider
             json_login:
-                check_path: /api/login_check
+                check_path: /api/login
                 username_path: email
                 password_path: password
                 success_handler: lexik_jwt_authentication.handler.authentication_success
                 failure_handler: lexik_jwt_authentication.handler.authentication_failure
             
+        api_doc:
+            pattern: ^/api/doc
+            security: false
         api:
             pattern: ^/api
             stateless: true
             provider: app_user_provider
             jwt: ~
-        dev:
-            pattern: ^/(_(profiler|wdt)|css|images|js)/
-            security: false
+        
         main:
             lazy: true
             provider: app_user_provider
@@ -43,8 +47,9 @@ security:
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
     access_control:
-        - { path: ^/api/login, roles: PUBLIC_ACCESS }
-        - { path: ^/api,       roles: IS_AUTHENTICATED_FULLY }
+        - { path: ^/api/login, roles: PUBLIC_ACCESS, methods: [ OPTIONS, POST ] }
+        - { path: ^/api/doc, roles: PUBLIC_ACCESS }
+        - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
 
 when@test:
     security:

@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\DTO\Property\CreatePropertyDTO;
+use App\DTO\Property\UpdatePropertyDTO;
 use App\Entity\Agent;
 use App\Entity\Property;
 use Doctrine\ORM\EntityManagerInterface;
@@ -88,7 +89,7 @@ class PropertyService
         }
     }
 
-    public function updateProperty(Uuid $propertyId, CreatePropertyDTO $updatePropertyDTO):Property{
+    public function updateProperty(Uuid $propertyId, UpdatePropertyDTO $updatePropertyDTO):Property{
         try{
             $property = $this->entityManager->getRepository(Property::class)->find($propertyId);
             if(!$property){

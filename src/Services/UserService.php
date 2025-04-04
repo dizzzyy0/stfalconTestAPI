@@ -17,7 +17,10 @@ use Symfony\Component\Uid\Uuid;
 class UserService
 {
 
-    public function __construct(private EntityManagerInterface $entityManager, private UserPasswordHasherInterface $passwordHasher)
+    public function __construct(
+        private readonly EntityManagerInterface $entityManager,
+        private readonly UserPasswordHasherInterface $passwordHasher,
+    )
     {}
 
     public function register(RegisterUserDTO $registerUserDTO):User{

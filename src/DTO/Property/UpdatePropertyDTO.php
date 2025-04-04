@@ -50,7 +50,7 @@ class UpdatePropertyDTO
     /**
      * Застосовує зміни з DTO до існуючого Entity
      */
-    public function applyToEntity(Property $property): void
+    public function toEntity(Property $property): void
     {
         if ($this->type !== null) {
             $property->setType(PropertyTypes::fromId($this->type) ?? $property->getType());

@@ -24,42 +24,38 @@ use JMS\Serializer\Annotation\Groups;
 ])]
 abstract class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
-    public const ROLE_ADMIN = 'admin';
-    public const ROLE_AGENT = 'agent';
-    public const ROLE_CUSTOMER = 'customer';
-
     #[ORM\Id]
     #[ORM\Column(type: 'uuid', unique: true)]
     #[Groups(["list", "details"])]
-    private ?Uuid $id = null;
+    protected ?Uuid $id = null;
 
     #[ORM\Column(length: 180)]
     #[Groups(["list", "details"])]
-    private ?string $email = null;
+    protected ?string $email = null;
 
     /**
      * @var list<string> The user roles
      */
     #[ORM\Column]
     #[Groups(["list", "details"])]
-    private array $roles = [self::ROLE_CUSTOMER];
+    protected array $roles = [];
 
     /**
      * @var string The hashed password
      */
     #[ORM\Column]
-    private ?string $password = null;
+    protected ?string $password = null;
 
     #[ORM\Column]
     #[Groups(["list", "details"])]
-    private ?string $phone = null;
+    protected ?string $phone = null;
 
     #[ORM\Column]
     #[Groups(["list", "details"])]
-    private ?string $name = null;
+    protected ?string $name = null;
 
     #[ORM\Column]
-    private bool $isBlocked = false;
+    protected bool $isBlocked = false;
 
     public function __construct()
     {
@@ -100,13 +96,8 @@ abstract class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     public function getRoles(): array
     {
-        $symfonyRoles = [];
+        $symfonyRoles = $this->roles;
 
-        foreach ($this->roles as $role) {
-            $symfonyRoles[] = 'ROLE_' . strtoupper($role);
-        }
-
-        // guarantee every user at least has ROLE_CUSTOMER
         $symfonyRoles[] = 'ROLE_CUSTOMER';
 
         return array_unique($symfonyRoles);

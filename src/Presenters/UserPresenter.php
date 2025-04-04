@@ -7,7 +7,7 @@ use App\Entity\Customer;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 
-class UserPresenter
+final readonly class UserPresenter
 {
     public function __construct(private readonly EntityManagerInterface $entityManager){}
     public function present(User $user): array

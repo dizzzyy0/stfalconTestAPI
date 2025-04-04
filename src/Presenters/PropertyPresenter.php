@@ -30,9 +30,10 @@ final readonly class PropertyPresenter
     }
 
     public function presentPaginatedProperty(array $propertyData): array{
+        $results = $propertyData['results'] ?? $propertyData['result'] ?? [];
         return [
-            'results' => array_map(fn (Property $property) => $this->present($property), $propertyData['results']),
-            'metadata'=> [
+            'results' => array_map(fn (Property $property) => $this->present($property), $results),
+            'metadata' => [
                 'total' => $propertyData['total'],
                 'offset' => $propertyData['offset'],
                 'limit' => $propertyData['limit'],

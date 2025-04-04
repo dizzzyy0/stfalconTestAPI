@@ -9,20 +9,23 @@
         "php": ">=8.3.19",
         "ext-ctype": "*",
         "ext-iconv": "*",
-        "api-platform/core": "^4.1",
         "doctrine/dbal": "^3",
         "doctrine/doctrine-bundle": "^2.14",
         "doctrine/doctrine-migrations-bundle": "^3.4",
         "doctrine/orm": "^3.3",
+        "egulias/email-validator": "^4.0",
         "jms/serializer": "^3.32",
         "lexik/jwt-authentication-bundle": "^3.1",
         "nelmio/api-doc-bundle": "^5.0",
+        "nelmio/cors-bundle": "^2.5",
         "runtime/frankenphp-symfony": "^0.2.0",
+        "symfony/asset": "7.2.*",
         "symfony/console": "7.2.*",
         "symfony/dotenv": "7.2.*",
         "symfony/flex": "^2",
         "symfony/framework-bundle": "7.2.*",
         "symfony/runtime": "7.2.*",
+        "symfony/serializer": "7.2.*",
         "symfony/twig-bundle": "^7.2",
         "symfony/uid": "7.2.*",
         "symfony/validator": "7.2.*",
@@ -80,6 +83,7 @@
         }
     },
     "require-dev": {
+        "doctrine/doctrine-fixtures-bundle": "^4.1",
         "symfony/maker-bundle": "^1.62"
     }
 }

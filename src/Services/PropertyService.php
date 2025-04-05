@@ -7,13 +7,14 @@ use App\DTO\Property\CreatePropertyDTO;
 use App\DTO\Property\UpdatePropertyDTO;
 use App\Entity\Agent;
 use App\Entity\Property;
+use App\Enum\PropertyStatus;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Symfony\Component\Uid\Uuid;
 
 class PropertyService
 {
-    public function __construct(private EntityManagerInterface $entityManager){}
+    public function __construct(private readonly EntityManagerInterface $entityManager){}
 
     public function createProperty(CreatePropertyDTO $createPropertyDTO):Property{
         try{
@@ -85,6 +86,30 @@ class PropertyService
             $agent = $this->entityManager->getRepository(Agent::class)->find($agentId);
             return iterator_to_array($agent->getProperties());
         }catch(\Exception $e){
+            throw new \Exception($e->getMessage());
+        }
+    }
+
+    public function changePropertyStatus(Uuid $propertyId, string $status): Property
+    {
+        try {
+            $property = $this->entityManager->getRepository(Property::class)->find($propertyId);
+
+            if (!$property) {
+                throw new \Exception('Property not found');
+            }
+
+            $propertyStatus = PropertyStatus::fromId($status);
+
+            if ($propertyStatus === null) {
+                throw new \Exception('Invalid property status');
+            }
+
+            $property->setStatus($propertyStatus);
+            $this->entityManager->flush();
+
+            return $property;
+        } catch (\Exception $e) {
             throw new \Exception($e->getMessage());
         }
     }

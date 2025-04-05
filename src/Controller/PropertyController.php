@@ -402,6 +402,65 @@ class PropertyController extends AbstractController
         );
     }
 
+    #[Route('api/property/status/{id}', name: 'property_change_status', methods: ['PUT'])]
+    #[OA\Put(
+        description: "Changes the status of a property.",
+        summary: "Change property status",
+        requestBody: new OA\RequestBody(
+            description: "New status for the property",
+            required: true,
+            content: new OA\JsonContent(ref: new Model(type: ChangeStatusDTO::class))
+        ),
+        tags: ["Property"],
+        parameters: [
+            new OA\Parameter(
+                name: 'id',
+                description: 'UUID of the property to update status',
+                in: 'path',
+                required: true,
+                schema: new OA\Schema(type: 'string', format: 'uuid')
+            )
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "Property status updated successfully",
+                content: new OA\JsonContent(
+                    type: "object",
+                    properties: [
+                        new OA\Property(property: "id", type: "string", format: "uuid", example: "550e8400-e29b-41d4-a716-446655440003"),
+                        new OA\Property(property: "status", properties: [
+                            new OA\Property(property: "id", type: "string", example: "available"),
+                            new OA\Property(property: "name", type: "string", example: "Available")
+                        ], type: "object")
+                    ]
+                )
+            ),
+            new OA\Response(response: 400, description: "Bad Request - Invalid status or UUID"),
+            new OA\Response(response: 404, description: "Not Found - Property with the specified ID not found")
+        ]
+    )]
+    public function changePropertyStatus(
+        #[MapRequestPayload] ChangeStatusDTO $changeStatusDTO,
+        Uuid $id,
+    ): JsonResponse {
+        try {
+            $updatedProperty = $this->propertyService->changePropertyStatus($id, $changeStatusDTO->status);
+
+            return new JsonResponse([
+                'id' => $updatedProperty->getId(),
+                'status' => [
+                    'id' => $updatedProperty->getStatus()->value,
+                    'name' => $updatedProperty->getStatus()->getName(),
+                ]
+            ], Response::HTTP_OK);
+
+        } catch (\InvalidArgumentException $e) {
+            return new JsonResponse(['error' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
+        } catch (\Exception $e) {
+            return new JsonResponse(['error' => $e->getMessage()], Response::HTTP_NOT_FOUND);
+        }
+    }
     #[Route('api/property/update/{id}', name: 'property_update', methods: ['PUT'])]
     #[OA\Put(
         description: "Updates an existing property with new details.",
@@ -475,6 +534,8 @@ class PropertyController extends AbstractController
             return new JsonResponse(Response::HTTP_BAD_REQUEST);
         }
     }
+
+
 
     #[Route('api/property/delete/{id}', name: 'property_delete', methods: ['DELETE'])]
     #[OA\Delete(

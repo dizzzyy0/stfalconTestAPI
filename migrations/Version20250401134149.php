@@ -54,7 +54,7 @@ final class Version20250401134149 extends AbstractMigration
             CREATE INDEX IDX_87C331C73414710B ON properties (agent_id)
         SQL);
         $this->addSql(<<<'SQL'
-           ALTER TABLE "user" ADD discriminator VARCHAR(255) DEFAULT 'User' NOT NULL
+           ALTER TABLE "user" ADD discriminator VARCHAR(255) DEFAULT 'customer' NOT NULL
         SQL);
     }
 

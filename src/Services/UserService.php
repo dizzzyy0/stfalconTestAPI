@@ -9,6 +9,9 @@ use App\Entity\Agent;
 use App\Entity\Customer;
 use App\Entity\Property;
 use App\Entity\User;
+use App\Enum\Role;
+use App\Repository\PropertyRepository;
+use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Doctrine\ORM\Tools\Pagination\Paginator;
@@ -20,19 +23,26 @@ class UserService
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
         private readonly UserPasswordHasherInterface $passwordHasher,
+        private readonly UserRepository $userRepository,
     )
     {}
 
     public function register(RegisterUserDTO $registerUserDTO):User{
-        $existingUser = $this->entityManager->getRepository(User::class)->findOneBy(['email' => $registerUserDTO->email]);
+        $existingUser = $this->userRepository->findOneBy(["email"=> $registerUserDTO->email]);
         if($existingUser){
-            return new Customer();
+            throw new \Exception(sprintf('User with email %s already exists', $registerUserDTO->email));
         }
 
-        $user = match ($registerUserDTO->role){
-            'ROLE_CUSTOMER' => new Customer(),
-            'ROLE_AGENT' => new Agent(),
-            default => throw new \Exception('Invalid role'),
+        $role = Role::tryFrom($registerUserDTO->role);
+
+        if (!$role) {
+            throw new \Exception('Invalid role');
+        }
+
+        $user = match ($role) {
+            Role::CUSTOMER => new Customer(),
+            Role::AGENT => new Agent(),
+            default => throw new \Exception('Unsupported role'),
         };
 
         $user->setEmail($registerUserDTO->email);
@@ -63,17 +73,11 @@ class UserService
     }
 
     public function getAllUsers(int $offset, int $limit): array{
-        $query = $this->entityManager->getRepository(User::class)->createQueryBuilder('u')
-            ->setFirstResult($offset)
-            ->setMaxResults($limit)
-            ->getQuery();
-        $paginator = new Paginator($query);
-        return [
-            'result'=> iterator_to_array($paginator),
-            'total' => $paginator->count(),
-            'offset' => $offset,
-            'limit' => $limit,
-        ];
+        try {
+            return $this->userRepository->getAllUsers($offset, $limit);
+        } catch (\Exception $e) {
+            throw new \Exception("Error fetching users: " . $e->getMessage());
+        }
     }
 
     public function updateUser(Uuid $userId, UpdateUserDTO $newUser): User{
@@ -95,19 +99,40 @@ class UserService
         return $existingUser;
     }
 
-    public function addFavoriteProperty(Uuid $userId, Uuid $propertyId): Customer{
+    public function addFavoriteProperty(Uuid $userId, Uuid $propertyId): Customer
+    {
         $customer = $this->entityManager->getRepository(Customer::class)->find($userId);
-        $propertyId = $this->entityManager->getRepository(Property::class)->find($propertyId);
-        $customer->addFavoriteProperty($propertyId);
+
+        if (!$customer) {
+            throw new \InvalidArgumentException('Customer not found with ID: ' . $userId);
+        }
+
+        $property = $this->entityManager->getRepository(Property::class)->find($propertyId);
+
+        if (!$property) {
+            throw new \InvalidArgumentException('Property not found with ID: ' . $propertyId);
+        }
+
+        $customer->addFavoriteProperty($property);
         $this->entityManager->persist($customer);
         $this->entityManager->flush();
+
         return $customer;
     }
 
     public function removeFavoriteProperty(Uuid $userId, Uuid $propertyId): Customer{
         $customer = $this->entityManager->getRepository(Customer::class)->find($userId);
-        $propertyId = $this->entityManager->getRepository(Property::class)->find($propertyId);
-        $customer->removeFavoriteProperty($propertyId);
+        if (!$customer) {
+            throw new \InvalidArgumentException('Customer not found with ID: ' . $userId);
+        }
+
+        $property = $this->entityManager->getRepository(Property::class)->find($propertyId);
+
+        if (!$property) {
+            throw new \InvalidArgumentException('Property not found with ID: ' . $propertyId);
+        }
+
+        $customer->removeFavoriteProperty($property);
         $this->entityManager->persist($customer);
         $this->entityManager->flush();
         return $customer;

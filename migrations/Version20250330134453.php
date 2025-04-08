@@ -21,7 +21,7 @@ final class Version20250330134453 extends AbstractMigration
     {
         // this up() migration is auto-generated, please modify it to your needs
         $this->addSql(<<<'SQL'
-            ALTER TABLE "user" ALTER id TYPE UUID
+            ALTER TABLE "user" ALTER id TYPE UUID USING id::uuid
         SQL);
         $this->addSql(<<<'SQL'
             COMMENT ON COLUMN "user".id IS '(DC2Type:uuid)'

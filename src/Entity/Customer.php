@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use AllowDynamicProperties;
+use App\Enum\Role;
 use App\Repository\CustomerRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -13,7 +14,7 @@ class Customer extends User
 {
     public function __construct(){
         parent::__construct();
-        $this->roles = ["ROLE_CUSTOMER"];
+        $this->roles = [Role::CUSTOMER->value];
         $this->favoriteProperties = new ArrayCollection();
     }
 

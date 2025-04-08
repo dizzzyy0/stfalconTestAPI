@@ -1,8 +1,7 @@
 <?php
-
 declare(strict_types=1);
 
-namespace App\Controller;
+namespace App\Controller\AuthActions;
 
 use App\DTO\User\RegisterUserDTO;
 use App\Presenters\UserPresenter;
@@ -15,60 +14,18 @@ use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
 use OpenApi\Attributes as OA;
 
-
-
-final class AuthController extends AbstractController
+class AuthRegisterAction extends AbstractController
 {
     public function __construct(
-        private readonly UserService $userService,
+        private readonly UserService   $userService,
         private readonly UserPresenter $userPresenter,
     )
-    { }
-
-    #[Route('/api/login', name: 'api_login', methods: ['POST'])]
-    #[OA\Post(
-        path: '/api/login',
-        description: 'JWT authentication',
-        summary: 'Login for user',
-        security: [],
-        requestBody: new OA\RequestBody(
-            required: true,
-            content: new OA\JsonContent(
-                required: ['email', 'password'],
-                properties: [
-                    new OA\Property(property: 'email', type: 'string', example: 'exampleUser@gmail.com'),
-                    new OA\Property(property: 'password', type: 'string', example: 'pass123')
-                ]
-            )
-        ),
-        tags: ['Authentication']
-    )]
-    #[OA\Response(
-        response: 200,
-        description: 'Successful authentication',
-        content: new OA\JsonContent(
-            properties: [
-                new OA\Property(property: 'token', type: 'string', example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...')
-            ]
-        )
-    )]
-    #[OA\Response(
-        response: 401,
-        description: 'Invalid credentials',
-        content: new OA\JsonContent(
-            properties: [
-                new OA\Property(property: 'error', type: 'string', example: 'Invalid email or password')
-            ]
-        )
-    )]
-    public function login(): JsonResponse
     {
-        return new JsonResponse(['message'=>'success']);
     }
 
-    #[Route("/api/register", name: "api_register", methods: ["POST"])]
+    #[Route("/api/auth/register", name: "api_register", methods: ["POST"])]
     #[OA\Post(
-        path: "/api/register",
+        path: "/api/auth/register",
         description: "Creates a new user account based on provided data.",
         summary: "Register a new user",
         security: [],

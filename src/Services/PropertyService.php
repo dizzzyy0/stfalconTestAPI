@@ -8,13 +8,17 @@ use App\DTO\Property\UpdatePropertyDTO;
 use App\Entity\Agent;
 use App\Entity\Property;
 use App\Enum\PropertyStatus;
+use App\Repository\PropertyRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Tools\Pagination\Paginator;
 use Symfony\Component\Uid\Uuid;
 
 class PropertyService
 {
-    public function __construct(private readonly EntityManagerInterface $entityManager){}
+
+    public function __construct(
+        private readonly EntityManagerInterface $entityManager,
+        private readonly PropertyRepository $propertyRepository
+    ){}
 
     public function createProperty(CreatePropertyDTO $createPropertyDTO):Property{
         try{
@@ -36,19 +40,11 @@ class PropertyService
     }
 
     public function getAllProperties(int $offset, int $limit):array{
-        $query = $this->entityManager->createQueryBuilder()
-            ->select('p')
-            ->from(Property::class, 'p')
-            ->setFirstResult($offset)
-            ->setMaxResults($limit)
-            ->getQuery();
-        $paginator = new Paginator($query);
-        return[
-          'result' => iterator_to_array($paginator),
-           'total' => $paginator->count(),
-           'offset' => $offset,
-           'limit' => $limit,
-        ];
+        try {
+            return $this->propertyRepository->getAllProperties($offset, $limit);
+        } catch (\Exception $e) {
+            throw new \Exception("Error fetching properties: " . $e->getMessage());
+        }
     }
 
     public function getProperty(Uuid $propertyId):Property{
@@ -60,24 +56,10 @@ class PropertyService
     }
 
     public function getPropertiesForUser(int $offset, int $limit, $visibleStatuses):array{
-        try{
-            $query = $this->entityManager->createQueryBuilder()
-                ->select('p')
-                ->from(Property::class, 'p')
-                ->where('p.status IN (:statuses)')
-                ->setParameter('statuses', $visibleStatuses)
-                ->setFirstResult($offset)
-                ->setMaxResults($limit)
-                ->getQuery();
-            $paginator = new Paginator($query);
-            return[
-                'result' => iterator_to_array($paginator),
-                'total' => $paginator->count(),
-                'offset' => $offset,
-                'limit' => $limit,
-            ];
-        }catch(\Exception $e){
-            throw new \Exception($e->getMessage());
+        try {
+            return $this->propertyRepository->getPropertiesForUser($offset, $limit, $visibleStatuses);
+        } catch (\Exception $e) {
+            throw new \Exception("Error fetching properties for user: " . $e->getMessage());
         }
     }
 
@@ -121,7 +103,7 @@ class PropertyService
                 throw new \Exception('Property not found');
             }
 
-            $property->applyToEntity($updatePropertyDTO->toEntity());
+            $property = $updatePropertyDTO->toEntity($property);
 
             $this->entityManager->flush();
             return $property;

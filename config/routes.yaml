@@ -1,5 +1,5 @@
 api_login:
-    path: /api/login
+    path: /api/auth/login
     
 app.swagger_ui:
     path: /api/doc

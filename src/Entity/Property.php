@@ -9,7 +9,6 @@ use App\Types\Price;
 use App\Types\PropertyLocation;
 use App\Types\Size;
 use Doctrine\ORM\Mapping as ORM;
-use JMS\Serializer\Annotation\Groups;
 use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity]
@@ -18,31 +17,24 @@ class Property
 {
     #[ORM\Id]
     #[ORM\Column(type: 'uuid', unique: true)]
-    #[Groups(['list', 'detail'])]
     private Uuid $id;
 
     #[ORM\Column(type: 'string', enumType: PropertyTypes::class)]
-    #[Groups(['list', 'detail'])]
     private PropertyTypes $type;
 
     #[ORM\Embedded(class: Price::class)]
-    #[Groups(['list', 'detail'])]
     private Price $price;
 
     #[ORM\Embedded(class: PropertyLocation::class)]
-    #[Groups(['list', 'detail'])]
     private PropertyLocation $location;
 
     #[ORM\Embedded(class: Size::class)]
-    #[Groups(['list', 'detail'])]
     private Size $size;
 
     #[ORM\Column(type: 'text')]
-    #[Groups(['list', 'detail'])]
     private string $description;
 
     #[ORM\Column(type: 'string', enumType: PropertyStatus::class)]
-    #[Groups(['list', 'detail'])]
     private PropertyStatus $status;
 
     #[ORM\ManyToOne(inversedBy: 'properties')]

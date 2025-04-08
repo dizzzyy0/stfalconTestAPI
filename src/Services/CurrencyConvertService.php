@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Enum\Currencies;
-use App\Types\Price;
 
 class CurrencyConvertService
 {
@@ -28,16 +27,5 @@ class CurrencyConvertService
             [Currencies::UAH, Currencies::EUR] => 0.022,
             default => 0,
         };
-    }
-
-    public function convertPrice(Price $price, Currencies $currencies):Price
-    {
-        $newPrice = new Price();
-        $sourceCurrency = $price->getCurrency();
-        $convertedAmount = $this->convertCurrency($sourceCurrency, $currencies, $price->getAmount());
-
-        $newPrice->setAmount($convertedAmount);
-        $newPrice->setCurrency($currencies);
-        return $newPrice;
     }
 }

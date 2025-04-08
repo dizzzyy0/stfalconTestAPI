@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Enum\Role;
 use App\Repository\AdminRepository;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -11,6 +12,6 @@ class Admin extends User
     public function __construct()
     {
         parent::__construct();
-        $this->roles = ["ROLE_ADMIN"];
+        $this->roles = [Role::ADMIN->value];
     }
 }

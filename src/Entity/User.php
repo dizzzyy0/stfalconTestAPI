@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\Enum\Role;
 use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\DiscriminatorColumn;
@@ -10,7 +11,6 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Doctrine\ORM\Mapping\DiscriminatorMap;
 use Symfony\Component\Uid\Uuid;
-use JMS\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
@@ -26,18 +26,15 @@ abstract class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\Column(type: 'uuid', unique: true)]
-    #[Groups(["list", "details"])]
     protected ?Uuid $id = null;
 
     #[ORM\Column(length: 180)]
-    #[Groups(["list", "details"])]
     protected ?string $email = null;
 
     /**
      * @var list<string> The user roles
      */
     #[ORM\Column]
-    #[Groups(["list", "details"])]
     protected array $roles = [];
 
     /**
@@ -47,11 +44,9 @@ abstract class User implements UserInterface, PasswordAuthenticatedUserInterface
     protected ?string $password = null;
 
     #[ORM\Column]
-    #[Groups(["list", "details"])]
     protected ?string $phone = null;
 
     #[ORM\Column]
-    #[Groups(["list", "details"])]
     protected ?string $name = null;
 
     #[ORM\Column]
@@ -96,9 +91,14 @@ abstract class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     public function getRoles(): array
     {
-        $symfonyRoles = $this->roles;
+        $symfonyRoles = array_map(function($role) {
+            if ($role instanceof Role) {
+                return $role->value;
+            }
+            return (string)$role;
+        }, $this->roles);
 
-        $symfonyRoles[] = 'ROLE_CUSTOMER';
+        $symfonyRoles[] = Role::CUSTOMER->value;
 
         return array_unique($symfonyRoles);
     }

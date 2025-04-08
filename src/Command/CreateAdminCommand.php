@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Command;
 
 use App\Entity\Admin;
+use App\Entity\User;
 use Symfony\Component\Validator\Constraints as Assert;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Command\Command;
@@ -49,7 +50,7 @@ class CreateAdminCommand extends Command
                 if(count($errors) > 0) {
                     throw new \Exception('The email is invalid.');
                 }
-                $existingAdmin = $this->entityManager->getRepository(Admin::class)->findOneBy(['email' => $email]);
+                $existingAdmin = $this->entityManager->getRepository(User::class)->findOneBy(['email' => $email]);
                 if($existingAdmin) {
                     throw new \Exception('The current email already exists.');
                 }

@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -16,6 +17,24 @@ class UserRepository extends ServiceEntityRepository
         parent::__construct($registry, User::class);
     }
 
+
+    public function getAllUsers(int $offset, int $limit): array{
+        try {
+            $query = $this->createQueryBuilder('u')
+                ->setFirstResult($offset)
+                ->setMaxResults($limit)
+                ->getQuery();
+            $paginator = new Paginator($query);
+            return [
+                'result'=> iterator_to_array($paginator),
+                'total' => $paginator->count(),
+                'offset' => $offset,
+                'limit' => $limit,
+            ];
+        } catch (\Exception $e) {
+            throw new \Exception("Unable to fetch users: " . $e->getMessage());
+        }
+    }
     //    /**
     //     * @return User[] Returns an array of User objects
     //     */

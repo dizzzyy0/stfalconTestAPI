@@ -14,7 +14,6 @@ final readonly class PropertyPresenter
         private readonly LocationPresenter $locationPresenter,
         private readonly SizePresenter $sizePresenter,
         private readonly PropertyStatusPresenter $propertyStatusPresenter,
-        private readonly UserPresenter $userPresenter,
     ){}
 
     public function present(Property $property): array{
@@ -45,10 +44,5 @@ final readonly class PropertyPresenter
         return [
             'results' => array_map(fn (Property $property) => $this->present($property), $properties),
         ];
-    }
-    public function presentUser(Property $property): array{
-        $result = $this->present($property);
-        $result['agent'] = $this->userPresenter->present($property->getAgent());
-        return $result;
     }
 }

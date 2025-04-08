@@ -5,11 +5,13 @@ namespace App\Presenters;
 
 use App\Entity\Customer;
 use App\Entity\User;
-use Doctrine\ORM\EntityManagerInterface;
+
 
 final readonly class UserPresenter
 {
-    public function __construct(private readonly EntityManagerInterface $entityManager){}
+    public function __construct(
+        private readonly PropertyPresenter $propertyPresenter,
+    ){}
     public function present(User $user): array
     {
         return [
@@ -32,17 +34,9 @@ final readonly class UserPresenter
         ];
     }
 
-    public function presentCustomer(Customer $customer): array{
-        $propertyTypePresenter = new PropertyTypesPresenter();
-        $propertyStatusPresenter = new PropertyStatusPresenter();
-        $currencyPresenter = new CurrencyPresenter();
-        $pricePresenter = new PricePresenter($currencyPresenter);
-        $locationPresenter = new LocationPresenter();
-        $sizePresenter = new SizePresenter();
-        $propertyPresenter = new PropertyPresenter();
-
+    public function presentCustomer(Customer $customer): array {
         $result = $this->present($customer);
-        $result['favorites'] = $propertyPresenter->presentProperties($customer->getFavoriteProperties());
+        $result['favorites'] = $this->propertyPresenter->presentList($customer->getFavoriteProperties());
         return $result;
     }
 }
